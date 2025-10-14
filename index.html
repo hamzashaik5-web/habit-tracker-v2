@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>OG Habit Tracker — v2</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#F6F3FF">
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <link rel="stylesheet" href="style.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>OG Habit Tracker</h1>
+    <div class="right-controls">
+      <div class="avatar" id="avatar">🌱</div>
+      <button id="addBtn" class="icon-btn">＋</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Add Habit Panel -->
+    <section class="input-row" id="addRow" hidden>
+      <input id="habitName" placeholder="Add habit (e.g. Reading)" maxlength="40">
+      <select id="iconSelect" title="Icon">
+        <option value="📚">📚 Reading</option>
+        <option value="✍️">✍️ Writing</option>
+        <option value="💪">💪 Workout</option>
+        <option value="🏃">🏃 Running</option>
+        <option value="🧘">🧘 Meditation</option>
+        <option value="🧠">🧠 Brain Training</option>
+        <option value="📅">📅 Planning</option>
+        <option value="🤝">🤝 Connect</option>
+      </select>
+      <input type="time" id="reminderTime" title="Reminder time">
+      <input type="number" id="reminderInterval" min="15" step="15" value="60" title="Repeat interval (mins)">
+      <label><input type="checkbox" id="enableRem" checked> Remind</label>
+      <button id="saveHabit">Save</button>
+      <button id="cancelAdd" class="ghost">Cancel</button>
+    </section>
+
+    <!-- Tabs -->
+    <nav class="tabs">
+      <button class="tab active" data-tab="habits">Habits</button>
+      <button class="tab" data-tab="progress">Progress</button>
+      <button class="tab" data-tab="stats">Stats</button>
+    </nav>
+
+    <!-- Habits List -->
+    <section id="habitsTab" class="tabcontent">
+      <section class="stats-inline">
+        <div class="stat small">Total XP <div id="totalXP">0</div></div>
+        <div class="stat small">Level <div id="level">0</div></div>
+        <div class="stat small">Habits <div id="habitCount">0</div></div>
+      </section>
+      <section id="habitsList" class="habits"></section>
+    </section>
+
+    <!-- Progress Tab -->
+    <section id="progressTab" class="tabcontent hidden">
+      <div class="progress-top">
+        <label for="habitSelectChart">Select Habit</label>
+        <select id="habitSelectChart"></select>
+      </div>
+      <canvas id="progressChart" height="140"></canvas>
+      <div class="chart-legend">Toggle between Line / Bar</div>
+      <div class="chart-controls">
+        <button id="chartLine">Line</button>
+        <button id="chartBar">Bar</button>
+      </div>
+    </section>
+
+    <!-- Stats Tab -->
+    <section id="statsTab" class="tabcontent hidden">
+      <h3>Weekly Insights</h3>
+      <div id="insights" class="insights"></div>
+    </section>
+
+    <section class="footer-note">
+      <small>Works offline. Data stays on your device (localStorage). Open the app once daily for reminders to work reliably.</small>
+    </section>
+  </main>
+
+  <!-- Templates -->
+  <template id="habitTemplate">
+    <div class="habit-card">
+      <div class="left">
+        <button class="check-btn" title="Mark done">✓</button>
+        <div class="details">
+          <div class="title"><span class="icon"></span> <span class="name"></span></div>
+          <div class="meta"></div>
+          <div class="progress-bar"><div class="progress"></div></div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="streak">🔥 <span class="streakCount">0</span></div>
+        <div class="xp">XP: <span class="xpVal">0</span></div>
+        <div class="actions">
+          <button class="edit">✎</button>
+          <button class="del">🗑</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Quote Modal -->
+  <div id="quoteModal" class="modal hidden" role="dialog" aria-hidden="true">
+    <div class="modal-card">
+      <div id="quoteText" class="quote">You did it!</div>
+      <div id="quoteBy" class="quoteby"></div>
+      <div class="modal-actions">
+        <button id="closeQuote">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
