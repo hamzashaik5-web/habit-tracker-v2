@@ -1,34 +1,38 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Habit Tracker V2 Fixed</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Tracker v3</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app">
-        <h1>Habit Tracker V2</h1>
-        <div id="avatar">😐</div>
-        <input type="text" id="habit-name" placeholder="Habit name">
-        <input type="text" id="habit-icon" placeholder="Icon (emoji)">
-        <input type="color" id="habit-color" value="#BFD7EA">
-        <button id="add-habit-btn">Add Habit</button>
-        <ul id="habits-list"></ul>
-
-        <canvas id="progress-chart"></canvas>
+  <div class="app-container">
+    <header>
+      <h1>🌈 Habit Tracker v3</h1>
+    </header>
+    <div class="habit-input">
+      <input id="habitName" type="text" placeholder="Enter new habit...">
+      <button id="addHabit">Add Habit</button>
     </div>
+    <div id="habitsContainer"></div>
 
-    <div id="quote-modal" class="hidden">
-        <p id="quote-text"></p>
-        <small id="quote-by"></small>
-        <button id="close-quote">Close</button>
+    <div class="chart-section">
+      <h2>Your Progress</h2>
+      <select id="chartSelect"></select>
+      <canvas id="habitChart"></canvas>
     </div>
+  </div>
 
-    <div id="confetti"></div>
+  <div id="popup" class="popup hidden">
+    <div class="popup-content">
+      <h2 id="popupTitle">Great Job!</h2>
+      <p id="popupQuote"></p>
+      <button id="closePopup">Close</button>
+    </div>
+  </div>
 
-<script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

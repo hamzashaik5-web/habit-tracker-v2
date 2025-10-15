@@ -1,132 +1,91 @@
+const habitsContainer = document.getElementById('habitsContainer');
+const habitNameInput = document.getElementById('habitName');
+const addHabitButton = document.getElementById('addHabit');
+const popup = document.getElementById('popup');
+const popupQuote = document.getElementById('popupQuote');
+const closePopup = document.getElementById('closePopup');
+const chartSelect = document.getElementById('chartSelect');
+const habitChartCtx = document.getElementById('habitChart').getContext('2d');
 
-// --- Element references ---
-const E = {
-    habitsList: document.getElementById("habits-list"),
-    addHabitBtn: document.getElementById("add-habit-btn"),
-    habitNameInput: document.getElementById("habit-name"),
-    habitIconInput: document.getElementById("habit-icon"),
-    habitColorInput: document.getElementById("habit-color"),
-    quoteModal: document.getElementById("quote-modal"),
-    quoteText: document.getElementById("quote-text"),
-    quoteBy: document.getElementById("quote-by"),
-    closeQuote: document.getElementById("close-quote"),
-    confetti: document.getElementById("confetti"),
-    chartCanvas: document.getElementById("progress-chart"),
-    avatar: document.getElementById("avatar"),
-};
+let habits = JSON.parse(localStorage.getItem('habits')) || {};
+let currentChart = null;
 
-let habits = JSON.parse(localStorage.getItem("habits")) || [];
-let totalXP = parseInt(localStorage.getItem("totalXP")) || 0;
-
-// --- Motivational quotes library ---
 const quotes = [
-    { text: "Great job!", by: "Habit Tracker" },
-    { text: "Keep it up, you're leveling!", by: "Motivation" },
-    { text: "Consistency is power!", by: "Wise Words" },
-    { text: "Every step counts!", by: "Encouragement" },
-    { text: "You're doing amazing!", by: "App" }
+  'Keep going, you are building greatness!',
+  'Each day counts. You’re leveling up!',
+  'Discipline is destiny — keep it up!',
+  'Tiny steps make huge impacts!',
+  'Success is built on daily effort!'
 ];
 
-// --- Utility functions ---
-function saveHabits() {
-    localStorage.setItem("habits", JSON.stringify(habits));
-    localStorage.setItem("totalXP", totalXP);
-}
+function saveHabits() { localStorage.setItem('habits', JSON.stringify(habits)); renderHabits(); }
 
-function triggerConfetti() {
-    const confetti = E.confetti;
-    confetti.innerHTML = "";
-    for (let i = 0; i < 12; i++) {
-        const piece = document.createElement("div");
-        piece.className = "piece";
-        piece.style.left = Math.random() * 100 + "%";
-        piece.style.background = `hsl(${Math.floor(Math.random() * 360)} 80% 60%)`;
-        piece.style.transform = `translateY(-200px) rotate(${Math.random() * 360}deg)`;
-        confetti.appendChild(piece);
-        setTimeout(() => piece.remove(), 1400);
-    }
-}
-
-function showQuote() {
-    const q = quotes[Math.floor(Math.random() * quotes.length)];
-    E.quoteText.textContent = q.text;
-    E.quoteBy.textContent = q.by;
-    E.quoteModal.classList.remove("hidden");
-    triggerConfetti();
-}
-
-// --- Habit completion ---
-function completeHabit(index) {
-    habits[index].completed = true;
-    habits[index].streak = (habits[index].streak || 0) + 1;
-    totalXP += 10;
-    saveHabits();
-    renderHabits();
-    showQuote();
-    updateAvatar();
-}
-
-// --- Render habits ---
 function renderHabits() {
-    E.habitsList.innerHTML = "";
-    habits.forEach((h, i) => {
-        const li = document.createElement("li");
-        li.className = "habit-card";
-        li.style.background = h.color || "#FFF";
-        li.innerHTML = `
-            <span class="icon">${h.icon || "⭐"}</span>
-            <span class="name">${h.name}</span>
-            <button class="complete-btn">${h.completed ? "✔️" : "Mark"}</button>
-        `;
-        li.querySelector(".complete-btn").addEventListener("click", () => completeHabit(i));
-        E.habitsList.appendChild(li);
-    });
+  habitsContainer.innerHTML = '';
+  for (let [name, data] of Object.entries(habits)) {
+    const div = document.createElement('div');
+    div.className = 'habit-item';
+    div.innerHTML = `<span>${name} (${data.streak}🔥)</span>
+      <button onclick="completeHabit('${name}')">Done</button>
+      <button onclick="deleteHabit('${name}')">🗑</button>`;
+    habitsContainer.appendChild(div);
+  }
+  populateChartSelect();
 }
 
-// --- Add habit ---
-E.addHabitBtn.addEventListener("click", () => {
-    const name = E.habitNameInput.value.trim();
-    if (!name) return alert("Enter habit name");
-    habits.push({
-        name,
-        icon: E.habitIconInput.value || "⭐",
-        color: E.habitColorInput.value || "#BFD7EA",
-        completed: false,
-        streak: 0,
-        points: 0
-    });
-    saveHabits();
-    renderHabits();
-    E.habitNameInput.value = "";
-});
-
-// --- Modal close ---
-E.closeQuote.addEventListener("click", () => {
-    E.quoteModal.classList.add("hidden");
-    E.quoteText.textContent = "";
-    E.quoteBy.textContent = "";
-});
-
-// --- Avatar update ---
-function updateAvatar() {
-    const level = Math.floor(totalXP / 50);
-    const stages = ["😐","🙂","😎","🦸","👑"];
-    E.avatar.textContent = stages[Math.min(level, stages.length-1)];
+function addHabit() {
+  const name = habitNameInput.value.trim();
+  if (!name || habits[name]) return;
+  habits[name] = { streak: 0, history: [] };
+  saveHabits();
+  habitNameInput.value = '';
 }
 
-// --- Chart rendering ---
-function renderChart() {
-    const labels = habits.map(h => h.name);
-    const data = habits.map(h => h.streak || 0);
-    if (window.progressChart) window.progressChart.destroy();
-    window.progressChart = new Chart(E.chartCanvas, {
-        type: 'bar',
-        data: { labels, datasets: [{ label: 'Streaks', data, backgroundColor: 'rgba(100,149,237,0.6)' }] },
-        options: { responsive: true, plugins: { legend: { display: false } } }
-    });
+function completeHabit(name) {
+  const today = new Date().toLocaleDateString();
+  if (habits[name].history.includes(today)) return;
+  habits[name].history.push(today);
+  habits[name].streak++;
+  saveHabits();
+  showPopup();
+  updateChart(name);
 }
 
-// --- Initialize ---
+function deleteHabit(name) {
+  delete habits[name];
+  saveHabits();
+}
+
+function showPopup() {
+  popupQuote.innerText = quotes[Math.floor(Math.random() * quotes.length)];
+  popup.classList.remove('hidden');
+}
+
+closePopup.onclick = () => popup.classList.add('hidden');
+
+function populateChartSelect() {
+  chartSelect.innerHTML = '';
+  Object.keys(habits).forEach(name => {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    chartSelect.appendChild(option);
+  });
+  if (chartSelect.value) updateChart(chartSelect.value);
+}
+
+chartSelect.onchange = () => updateChart(chartSelect.value);
+
+function updateChart(name) {
+  if (!name || !habits[name]) return;
+  const labels = habits[name].history;
+  const data = labels.map((_, i) => i + 1);
+  if (currentChart) currentChart.destroy();
+  currentChart = new Chart(habitChartCtx, {
+    type: 'line',
+    data: { labels, datasets: [{ label: name, data, borderColor: '#ffb6c1', fill: false, tension: 0.3 }] },
+    options: { scales: { y: { beginAtZero: true } } }
+  });
+}
+
 renderHabits();
-updateAvatar();
-renderChart();
